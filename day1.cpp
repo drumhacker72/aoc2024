@@ -5,7 +5,6 @@
 using namespace std;
 
 #include <lexy/action/parse.hpp>
-#include <lexy/callback.hpp>
 #include <lexy/dsl.hpp>
 #include <lexy/input/file.hpp>
 #include <lexy_ext/report_error.hpp>
@@ -15,13 +14,12 @@ namespace grammar {
     namespace dsl = lexy::dsl;
     struct line
     {
-        static constexpr auto rule = dsl::peek(dsl::digit<>)
-                >> dsl::integer<int> + dsl::whitespace(dsl::ascii::blank) + dsl::integer<int>;
+        static constexpr auto rule = dsl::integer<int> >> dsl::whitespace(dsl::lit_c<' '>) + dsl::integer<int>;
         static constexpr auto value = lexy::construct<pair<int, int>>;
     };
     struct input
     {
-        static constexpr auto rule = dsl::list(dsl::p<line>, dsl::trailing_sep(dsl::ascii::newline));
+        static constexpr auto rule = dsl::list(dsl::p<line>, dsl::trailing_sep(dsl::ascii::newline)) + dsl::eof;
         static constexpr auto value = lexy::as_list<vector<pair<int, int>>>;
     };
 }

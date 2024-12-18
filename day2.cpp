@@ -7,7 +7,28 @@
 
 using namespace std;
 
+#include <lexy/action/parse.hpp>
+#include <lexy/dsl.hpp>
+#include <lexy/input/file.hpp>
+#include <lexy_ext/report_error.hpp>
+
 using Report = vector<int>;
+
+namespace {
+namespace grammar {
+    namespace dsl = lexy::dsl;
+    struct report
+    {
+        static constexpr auto rule = dsl::list(dsl::integer<int>, dsl::sep(dsl::lit_c<' '>));
+        static constexpr auto value = lexy::as_list<Report>;
+    };
+    struct report_list
+    {
+        static constexpr auto rule = dsl::list(dsl::p<report>, dsl::trailing_sep(dsl::ascii::newline)) + dsl::eof;
+        static constexpr auto value = lexy::as_list<vector<Report>>;
+    };
+    using input = report_list;
+}
 
 bool is_safe(const Report& r)
 {
@@ -19,20 +40,13 @@ bool is_safe(const Report& r)
     bool close = all_of(ds.begin(), ds.end(), [](int d) { return 1 <= abs(d) && abs(d) <= 3; });
     return (inc || dec) && close;
 }
+}
 
 int main()
 {
-    vector<Report> rs;
-    string line;
-    while (getline(cin, line))
-    {
-        std::istringstream ss {line};
-        Report r;
-        int level;
-        while (ss >> level)
-            r.push_back(level);
-        rs.push_back(r);
-    }
+    auto file = lexy::read_stdin();
+    auto result = lexy::parse<grammar::input>(file.buffer(), lexy_ext::report_error);
+    vector<Report> rs = result.value();
     int num_safe = 0;
     for (auto&& r : rs)
     {

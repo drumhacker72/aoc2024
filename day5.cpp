@@ -8,7 +8,47 @@
 
 using namespace std;
 
-map<int, vector<int>> deps;
+#include <lexy/action/parse.hpp>
+#include <lexy/callback.hpp>
+#include <lexy/dsl.hpp>
+#include <lexy/input/file.hpp>
+#include <lexy_ext/report_error.hpp>
+
+using Dependencies = map<int, set<int>>;
+using Update = vector<int>;
+
+namespace {
+namespace grammar {
+    namespace dsl = lexy::dsl;
+    struct order_rule_list
+    {
+        static constexpr auto rule = [] {
+            auto line = dsl::integer<int> >> dsl::vbar + dsl::integer<int>;
+            return dsl::list(line, dsl::trailing_sep(dsl::ascii::newline));
+        }();
+        static constexpr auto value = lexy::fold_inplace<Dependencies>(
+            initializer_list<Dependencies::value_type>{},
+            [](auto& deps, int before, int after) { deps[after].insert(before); }
+        );
+    };
+    struct update
+    {
+        static constexpr auto rule = dsl::list(dsl::integer<int>, dsl::sep(dsl::comma));
+        static constexpr auto value = lexy::as_list<Update>;
+    };
+    struct update_list
+    {
+        static constexpr auto rule = dsl::list(dsl::p<update>, dsl::trailing_sep(dsl::ascii::newline));
+        static constexpr auto value = lexy::as_list<vector<Update>>;
+    };
+    struct input
+    {
+        static constexpr auto rule = dsl::p<order_rule_list> + dsl::ascii::newline + dsl::p<update_list> + dsl::eof;
+        static constexpr auto value = lexy::construct<pair<Dependencies, vector<Update>>>;
+    };
+}
+
+Dependencies deps;
 
 bool in_order(vector<int> const& update)
 {
@@ -51,27 +91,14 @@ vector<int> make_order(set<int> pages)
     }
     return update;
 }
+}
 
 int main()
 {
-    vector<vector<int>> updates;
-
-    string line;
-    while (getline(cin, line))
-    {
-        if (line.empty())
-            break;
-        int x, y;
-        sscanf(line.c_str(), "%d|%d", &x, &y);
-        deps[y].push_back(x);
-    }
-    while (getline(cin, line))
-    {
-        vector<int> update;
-        for (auto page : views::split(line, ","sv))
-            update.push_back(stoi(string{string_view{page}}));
-        updates.push_back(update);
-    }
+    auto file = lexy::read_stdin();
+    auto result = lexy::parse<grammar::input>(file.buffer(), lexy_ext::report_error);
+    deps = get<0>(result.value());
+    auto updates = get<1>(result.value());
 
     int corrects = 0;
     int incorrects = 0;
