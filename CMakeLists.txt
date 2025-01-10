@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.28)
 set(CMAKE_CXX_STANDARD 23)
 
 project(aoc2024)
@@ -25,3 +25,6 @@ add_executable(day5 day5.cpp)
 target_link_libraries(day5 PRIVATE foonathan::lexy)
 
 add_executable(day6 day6.cpp)
+
+add_executable(day7 day7.cpp)
+target_link_libraries(day7 PRIVATE foonathan::lexy)
