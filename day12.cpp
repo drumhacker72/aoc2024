@@ -42,6 +42,7 @@ struct Region
     char plant;
     int area;
     int perimeter;
+    int corners;
 
     bool try_merge(Region* r)
     {
@@ -51,12 +52,17 @@ struct Region
             return false;
         area += r->area;
         perimeter += r->perimeter;
-        *r = {' ', 0, 0};
+        corners += r->corners;
+        *r = {' ', 0, 0, 0};
         return true;
     }
-    int price() const
+    int price1() const
     {
         return area * perimeter;
+    }
+    int price2() const
+    {
+        return area * corners;
     }
 };
 
@@ -85,7 +91,24 @@ int main()
                 ++perimeter;
             if (grid[p] != grid[p.right()])
                 ++perimeter;
-            regions.push_back({grid[p], 1, perimeter});
+            int corners = 0;
+            if (grid[p] != grid[p.up()] && grid[p] != grid[p.left()])
+                ++corners;
+            if (grid[p] != grid[p.up()] && grid[p] != grid[p.right()])
+                ++corners;
+            if (grid[p] != grid[p.down()] && grid[p] != grid[p.left()])
+                ++corners;
+            if (grid[p] != grid[p.down()] && grid[p] != grid[p.right()])
+                ++corners;
+            if (grid[p] == grid[p.up()] && grid[p] == grid[p.left()] && grid[p] != grid[p.up().left()])
+                ++corners;
+            if (grid[p] == grid[p.up()] && grid[p] == grid[p.right()] && grid[p] != grid[p.up().right()])
+                ++corners;
+            if (grid[p] == grid[p.down()] && grid[p] == grid[p.left()] && grid[p] != grid[p.down().left()])
+                ++corners;
+            if (grid[p] == grid[p.down()] && grid[p] == grid[p.right()] && grid[p] != grid[p.down().right()])
+                ++corners;
+            regions.push_back({grid[p], 1, perimeter, corners});
             Region* region = &regions.back();
             if (x > 0 && this_row.back()->try_merge(region))
                 region = this_row.back();
@@ -99,10 +122,15 @@ int main()
         last_row = this_row;
     }
 
-    int total_price = 0;
+    int total_price1 = 0;
+    int total_price2 = 0;
     for (auto const& r : regions)
-        total_price += r.price();
-    cout << total_price << '\n';
+    {
+        total_price1 += r.price1();
+        total_price2 += r.price2();
+    }
+    cout << total_price1 << '\n';
+    cout << total_price2 << '\n';
 
     return 0;
 }
