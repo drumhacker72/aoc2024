@@ -4,12 +4,20 @@ set(CMAKE_CXX_STANDARD 23)
 project(aoc2024)
 
 include(FetchContent)
+
 FetchContent_Declare(
     lexy
     DOWNLOAD_EXTRACT_TIMESTAMP ON
     URL https://github.com/foonathan/lexy/releases/download/v2022.12.1/lexy-src.zip
 )
 FetchContent_MakeAvailable(lexy)
+
+FetchContent_Declare(
+    PixelToaster
+    GIT_REPOSITORY https://github.com/thedmd/pixeltoaster.git
+    GIT_TAG c791826964cde9465fa113a5e15c494aa33f059b
+)
+FetchContent_MakeAvailable(PixelToaster)
 
 add_executable(day1 day1.cpp)
 target_link_libraries(day1 PRIVATE foonathan::lexy)
@@ -41,3 +49,7 @@ add_executable(day12 day12.cpp)
 
 add_executable(day13 day13.cpp)
 target_link_libraries(day13 PRIVATE foonathan::lexy)
+
+add_executable(day14 day14.cpp)
+target_include_directories(day14 PRIVATE ${PixelToaster_SOURCE_DIR})
+target_link_libraries(day14 PRIVATE foonathan::lexy PixelToaster)
