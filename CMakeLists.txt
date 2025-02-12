@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 project(aoc2024)
 
@@ -57,3 +58,8 @@ target_link_libraries(day14 PRIVATE foonathan::lexy PixelToaster)
 add_executable(day15 day15.cpp)
 
 add_executable(day16 day16.cpp)
+
+add_executable(day17 day17.cpp)
+target_link_libraries(day17 PRIVATE foonathan::lexy)
+
+add_executable(day18 day18.cpp)
