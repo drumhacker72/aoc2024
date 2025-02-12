@@ -53,3 +53,5 @@ target_link_libraries(day13 PRIVATE foonathan::lexy)
 add_executable(day14 day14.cpp)
 target_include_directories(day14 PRIVATE ${PixelToaster_SOURCE_DIR})
 target_link_libraries(day14 PRIVATE foonathan::lexy PixelToaster)
+
+add_executable(day15 day15.cpp)
