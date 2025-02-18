@@ -76,3 +76,5 @@ add_executable(day23 day23.cpp)
 
 add_executable(day24 day24.cpp)
 target_link_libraries(day24 PRIVATE foonathan::lexy)
+
+add_executable(day25 day25.cpp)
